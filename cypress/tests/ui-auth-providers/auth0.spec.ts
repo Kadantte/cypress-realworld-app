@@ -1,11 +1,15 @@
 import { isMobile } from "../../support/utils";
 
-if (Cypress.env("auth0_username")) {
+if (Cypress.expose("auth0_configured")) {
   describe("Auth0", function () {
     beforeEach(function () {
       cy.task("db:seed");
       cy.intercept("POST", "/graphql").as("createBankAccount");
-      cy.loginToAuth0(Cypress.env("auth0_username"), Cypress.env("auth0_password"));
+      cy.task<{ username: string; password: string }>("getAuth0Credentials").then(
+        ({ username, password }) => {
+          cy.loginToAuth0(username, password);
+        }
+      );
       cy.visit("/");
     });
 
